@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
 import './register_screen.dart';
+import './forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -85,6 +86,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       foregroundColor: Colors.white,
                       backgroundColor: Colors.blue,
                       padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Get.to(() => ForgotPasswordScreen()),
+                      child: Text('Quên mật khẩu?'),
                     ),
                   ),
                   SizedBox(height: 16),
