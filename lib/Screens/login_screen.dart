@@ -1,9 +1,13 @@
+import 'package:ecommerce/Screens/forgot_password_screen.dart';
 import 'package:ecommerce/Screens/homescreen.dart';
+import 'package:ecommerce/Screens/register_screen.dart';
+import 'package:ecommerce/Utils/snackbar_utils.dart';
+import 'package:ecommerce/presentation/blocs/Login_Bloc/login_bloc.dart';
+import 'package:ecommerce/presentation/blocs/Login_Bloc/login_event.dart';
+import 'package:ecommerce/presentation/blocs/Login_Bloc/login_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import '../services/auth_service.dart';
-import './register_screen.dart';
-import './forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -11,12 +15,30 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _onLoginButtonPressed() {
+    if (_formKey.currentState!.validate()) {
+      context.read<LoginBloc>().add(LoginSubmitted(
+            email: _usernameController.text,
+            password: _passwordController.text,
+          ));
+    }
+  }
+
+  void _onGoogleLoginPressed() {
+    context.read<LoginBloc>().add(LoginWithGoogle());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,15 +99,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   ),
                   SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    child: _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
-                        : Text('Đăng Nhập'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                  BlocListener<LoginBloc, LoginState>(
+                    listener: (context, state) {
+                      if (state is LoginSuccess) {
+                        Get.offAll(() => HomeScreen());
+                        SnackbarUtils.showSuccessSnackBar(
+                            context, 'Đăng nhập thành công!');
+                      } else if (state is LoginFailure) {
+                        SnackbarUtils.showErrorSnackBar(context, state.error);
+                      }
+                    },
+                    child: BlocBuilder<LoginBloc, LoginState>(
+                      builder: (context, state) {
+                        return ElevatedButton(
+                          onPressed: state is LoginLoading
+                              ? null
+                              : _onLoginButtonPressed,
+                          child: state is LoginLoading
+                              ? CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : Text('Đăng Nhập'),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.blue,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   SizedBox(height: 16),
@@ -108,16 +149,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _handleGoogleLogin,
-                    icon: Image.asset(
-                      'assets/images/google.png',
-                      height: 24,
-                    ),
-                    label: Text('Đăng nhập với Google'),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                    ),
+                  BlocBuilder<LoginBloc, LoginState>(
+                    builder: (context, state) {
+                      return OutlinedButton.icon(
+                        onPressed: state is LoginLoading
+                            ? null
+                            : _onGoogleLoginPressed,
+                        icon: Image.asset(
+                          'assets/images/google.png',
+                          height: 24,
+                        ),
+                        label: Text('Đăng nhập với Google'),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(height: 24),
                   Row(
@@ -144,73 +191,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      try {
-        final userCredential = await _authService.signInWithEmailPassword(
-          _usernameController.text,
-          _passwordController.text,
-        );
-        if (userCredential != null) {
-          Get.offAll(() => HomeScreen());
-        } else {
-          Get.snackbar(
-            'Lỗi',
-            'Đăng nhập không thành công',
-            snackPosition: SnackPosition.BOTTOM,
-          );
-        }
-      } catch (e) {
-        Get.snackbar(
-          'Lỗi',
-          e.toString(),
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _handleGoogleLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      final userCredential = await _authService.signInWithGoogle();
-      if (userCredential != null) {
-        Get.offAll(() => HomeScreen());
-      } else {
-        Get.snackbar(
-          'Lỗi',
-          'Đăng nhập Google không thành công',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-      }
-    } catch (e) {
-      Get.snackbar(
-        'Lỗi',
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }
