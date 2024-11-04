@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:ecommerce/presentation/blocs/_Bloc/register_event.dart';
-import 'package:ecommerce/presentation/blocs/_Bloc/register_state.dart';
+import 'package:ecommerce/presentation/blocs/Register_Bloc/register_event.dart';
+import 'package:ecommerce/presentation/blocs/Register_Bloc/register_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 

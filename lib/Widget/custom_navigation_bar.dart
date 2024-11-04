@@ -17,9 +17,9 @@ class CustomNavigationBar extends StatelessWidget {
       index: index,
       height: 60.0,
       items: <Widget>[
-        Icon(Icons.category, size: 30),
+        Icon(Icons.home, size: 30),
         Icon(Icons.search, size: 30),
-        Icon(Icons.home, size: 40), // Larger icon for Home
+        Icon(Icons.category, size: 30),
         Icon(Icons.shopping_cart, size: 30),
         Icon(Icons.person, size: 30),
       ],

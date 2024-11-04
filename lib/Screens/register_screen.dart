@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:ecommerce/presentation/blocs/_Bloc/register_bloc.dart';
-import 'package:ecommerce/presentation/blocs/_Bloc/register_event.dart';
-import 'package:ecommerce/presentation/blocs/_Bloc/register_state.dart';
+import 'package:ecommerce/presentation/blocs/Register_Bloc/register_bloc.dart';
+import 'package:ecommerce/presentation/blocs/Register_Bloc/register_event.dart';
+import 'package:ecommerce/presentation/blocs/Register_Bloc/register_state.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override

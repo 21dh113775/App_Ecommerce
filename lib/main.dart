@@ -1,11 +1,15 @@
-import 'package:ecommerce/presentation/blocs/Login_Bloc/login_bloc.dart';
-import 'package:ecommerce/services/auth_service.dart';
+// main.dart
+import 'package:ecommerce/Data/Model/Repositories/product_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'presentation/blocs/_Bloc/register_bloc.dart';
-import 'routes/app_routes.dart';
 import 'firebase/firebase_options.dart';
+import 'presentation/blocs/Login_Bloc/login_bloc.dart';
+import 'presentation/blocs/Product_Bloc/product_bloc.dart';
+import 'presentation/blocs/Product_Bloc/product_event.dart';
+import 'presentation/blocs/Register_Bloc/register_bloc.dart';
+import 'services/auth_service.dart';
+import 'routes/app_routes.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() async {
@@ -13,7 +17,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+
+  runApp(
+    RepositoryProvider(
+      create: (context) => ProductRepository(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,11 +32,16 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (context) => RegisterBloc()), // Khởi tạo RegisterBloc
+          create: (context) => RegisterBloc(),
+        ),
         BlocProvider(
-            create: (context) => LoginBloc(
-                authService:
-                    AuthService())), // Khởi tạo LoginBloc với AuthService
+          create: (context) => LoginBloc(authService: AuthService()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              ProductBloc(RepositoryProvider.of<ProductRepository>(context))
+                ..add(LoadProducts()),
+        ),
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
@@ -36,7 +51,7 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         getPages: AppRoutes.routes,
-        initialRoute: '/onboarding', // Onboarding là trang đầu tiên
+        initialRoute: '/onboarding',
       ),
     );
   }
